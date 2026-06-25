@@ -23,6 +23,7 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [passwordFocused, setPasswordFocused] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
@@ -195,7 +196,7 @@ export default function LoginScreen() {
               )}
 
               {/* Row 2: password (password tab) or invisible spacer (other tabs) */}
-              <View style={[styles.passwordRow, !isPassword && styles.hidden]}>
+              <View style={[styles.passwordRow, passwordFocused && styles.passwordRowFocused, !isPassword && styles.hidden]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder={trAuth.password}
@@ -204,6 +205,8 @@ export default function LoginScreen() {
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                   editable={isPassword}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                 />
                 <TouchableOpacity
                   style={styles.eyeBtn}
@@ -331,9 +334,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     paddingLeft: spacing.md,
   },
+  passwordRowFocused: { borderColor: '#4A90D9' },
   passwordInput: {
     flex: 1, height: '100%',
     fontSize: fontSizes.md, color: colors.text,
+    outlineStyle: 'none' as any,
   },
   eyeBtn: { padding: spacing.md },
   hidden: { height: inputHeight, opacity: 0, pointerEvents: 'none' as any },
