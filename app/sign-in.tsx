@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
-  KeyboardAvoidingView, Platform, TouchableOpacity, Animated,
+  KeyboardAvoidingView, Platform, TouchableOpacity,
 } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -23,18 +23,7 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const METHODS: Method[] = ['password', 'email-otp', 'phone-otp']
-  const [tabWidth, setTabWidth] = useState(0)
-  const tabSlide = useRef(new Animated.Value(0)).current
-
   function switchMethod(newMethod: Method) {
-    const index = METHODS.indexOf(newMethod)
-    Animated.spring(tabSlide, {
-      toValue: index * tabWidth,
-      useNativeDriver: true,
-      tension: 300,
-      friction: 30,
-    }).start()
     setMethod(newMethod)
     reset()
   }
@@ -181,13 +170,7 @@ export default function LoginScreen() {
           </View>
         )}
 
-        <View
-          style={styles.tabs}
-          onLayout={(e) => setTabWidth((e.nativeEvent.layout.width - 6) / METHODS.length)}
-        >
-          {tabWidth > 0 && (
-            <Animated.View style={[styles.tabPill, { width: tabWidth, transform: [{ translateX: tabSlide }] }]} />
-          )}
+        <View style={styles.tabs}>
           <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => switchMethod('password')} />
           <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => switchMethod('email-otp')} />
           <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => switchMethod('phone-otp')} />
@@ -321,10 +304,9 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#A5D6A7',
   },
   successText: { flex: 1, fontSize: fontSizes.sm, color: '#2e7d32' },
-  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border, position: 'relative' },
-  tabPill: { position: 'absolute', top: 3, bottom: 3, left: 3, backgroundColor: colors.primary, borderRadius: radius.md - 4 },
-  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.md - 4, zIndex: 1 },
-  tabActive: {},
+  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border },
+  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.md - 4 },
+  tabActive: { backgroundColor: colors.primary },
   tabText: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.muted },
   tabTextActive: { color: '#fff' },
   form: { gap: spacing.md },
