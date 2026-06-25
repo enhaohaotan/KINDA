@@ -1,6 +1,6 @@
 import { expressions } from '../data/expressions'
 import { expressionsDa } from '../data/expressions-da'
-import { TRANSLATIONS, type LanguageCode } from '../data/languages'
+import type { LanguageCode } from '../data/languages'
 import type { Expression } from '../data/expressions'
 
 export function getExpressions(learningLanguage: LanguageCode): Expression[] {
@@ -23,6 +23,5 @@ export function getTone(expr: Expression, uiLanguage: LanguageCode): string {
   return expr.toneZh
 }
 
-export function t(uiLanguage: LanguageCode) {
-  return TRANSLATIONS[uiLanguage] ?? TRANSLATIONS['en']
-}
+// Re-export for screens that only need t()
+export { t, tAuth, tLearning } from '../i18n'

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
 import { UI_LANGUAGES, TARGET_LANGUAGES, getTargetLabel, type LanguageCode } from '../src/data/languages'
+import { t, tAuth } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 const COUNTRY_CODES = [
@@ -36,11 +37,13 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [uiLanguage, setUiLanguage] = useState<LanguageCode>('en')
-  const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('en')
+  const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('da')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
   const { setLanguages } = useUserStore()
+  const tr = t(uiLanguage)
+  const trAuth = tAuth(uiLanguage)
 
   async function handleRegister() {
     setError('')
@@ -95,11 +98,11 @@ export default function RegisterScreen() {
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Create account</Text>
-        <Text style={styles.subtitle}>Join 都行 KINDA</Text>
+        <Text style={styles.title}>{trAuth.createAccount}</Text>
+        <Text style={styles.subtitle}>{trAuth.joinKinda}</Text>
 
         <View style={styles.form}>
-          <Field label="Username">
+          <Field label={trAuth.username}>
             <TextInput
               style={styles.input}
               placeholder="e.g. coollearner"
@@ -111,7 +114,7 @@ export default function RegisterScreen() {
             />
           </Field>
 
-          <Field label="Email">
+          <Field label={trAuth.email}>
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
@@ -123,7 +126,7 @@ export default function RegisterScreen() {
             />
           </Field>
 
-          <Field label="Phone (optional)">
+          <Field label={trAuth.phoneOptional}>
             <View style={styles.phoneRow}>
               <TouchableOpacity style={styles.countryBtn} onPress={() => setShowCountryPicker(true)}>
                 <Text style={styles.countryCode}>{countryCode}</Text>
@@ -140,7 +143,7 @@ export default function RegisterScreen() {
             </View>
           </Field>
 
-          <Field label="I speak">
+          <Field label={tr.iSpeak}>
             <View style={styles.langRow}>
               {UI_LANGUAGES.map((lang) => (
                 <TouchableOpacity
@@ -154,7 +157,7 @@ export default function RegisterScreen() {
             </View>
           </Field>
 
-          <Field label="I want to learn">
+          <Field label={tr.iLearn}>
             <View style={styles.langRow}>
               {TARGET_LANGUAGES.map((lang) => (
                 <TouchableOpacity
@@ -168,7 +171,7 @@ export default function RegisterScreen() {
             </View>
           </Field>
 
-          <Field label="Password">
+          <Field label={trAuth.password}>
             <TextInput
               style={styles.input}
               placeholder="Min. 6 characters"
@@ -179,7 +182,7 @@ export default function RegisterScreen() {
             />
           </Field>
 
-          <Field label="Confirm password">
+          <Field label={trAuth.confirmPassword}>
             <TextInput
               style={styles.input}
               placeholder="Same as above"
@@ -198,11 +201,11 @@ export default function RegisterScreen() {
             disabled={loading}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryBtnText}>{loading ? 'Creating account…' : 'Create account'}</Text>
+            <Text style={styles.primaryBtnText}>{loading ? trAuth.creatingAccount : trAuth.createAccount}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.linkBtn} onPress={() => router.replace('/sign-in')}>
-            <Text style={styles.linkText}>Already have an account? <Text style={styles.linkEmphasis}>Sign in</Text></Text>
+            <Text style={styles.linkText}>{trAuth.alreadyHaveAccount} <Text style={styles.linkEmphasis}>{trAuth.signIn}</Text></Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

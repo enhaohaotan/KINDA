@@ -4,7 +4,7 @@ import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useLearningStore } from '../../src/store/learningStore'
 import { useUserStore } from '../../src/store/userStore'
-import { getExpressions, getMeaning, getUsage, t } from '../../src/lib/i18n'
+import { getExpressions, getMeaning, getUsage, tLearning } from '../../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../../src/styles/tokens'
 
 function getTodayExpression(learningLanguage: string) {
@@ -16,7 +16,7 @@ function getTodayExpression(learningLanguage: string) {
 export default function HomeScreen() {
   const { todayExpression, setTodayExpression, setActiveExpression, updateStatus, getStatus, statuses } = useLearningStore()
   const { uiLanguage, learningLanguage } = useUserStore()
-  const tr = t(uiLanguage)
+  const tr = tLearning(uiLanguage)
 
   useEffect(() => {
     const expr = getTodayExpression(learningLanguage)
