@@ -37,7 +37,7 @@ export const COMMON: Record<LanguageCode, CommonTranslations> = {
   },
   da: {
     appName: 'KINDA',
-    appTagline: 'Lær. Eller lad være. Begge dele er fint.',
+    appTagline: 'Flydende? En dag. Måske.',
     appDesc: 'En AI-sprogapp der ikke maser på.\nÅbn den når du har lyst.',
     iSpeak: 'Jeg taler',
     iLearn: 'Jeg vil lære',
