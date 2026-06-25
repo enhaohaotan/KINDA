@@ -1,11 +1,18 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
-const ExpoSecureStoreAdapter = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-}
+const ExpoSecureStoreAdapter = Platform.OS === 'web'
+  ? {
+      getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
+      setItem: (key: string, value: string) => { localStorage.setItem(key, value); return Promise.resolve() },
+      removeItem: (key: string) => { localStorage.removeItem(key); return Promise.resolve() },
+    }
+  : {
+      getItem: (key: string) => SecureStore.getItemAsync(key),
+      setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+      removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+    }
 
 let _client: SupabaseClient | null = null
 
@@ -32,3 +39,7 @@ export const supabase = new Proxy({} as SupabaseClient, {
     return (getClient() as any)[prop]
   },
 })
+
+export function getSupabase() {
+  return getClient()
+}
