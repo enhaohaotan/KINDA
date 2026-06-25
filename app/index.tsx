@@ -16,7 +16,7 @@ export default function Index() {
 
   if (DEV_MODE) return <Redirect href="/(tabs)/home" />
 
-  if (!userId) return <Redirect href="/login" />
+  if (!userId) return <Redirect href="/sign-in" />
   if (!onboardingComplete) return <Redirect href="/onboarding" />
   return <Redirect href="/(tabs)/home" />
 }
