@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { getCountries, getCountryCallingCode, type CountryCode } from 'libphonenumber-js'
-import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
+import { colors, fontSizes, spacing, radius, inputHeight } from '../../styles/tokens'
 
 type CountryEntry = { iso: CountryCode; dialCode: string; name: string }
 
@@ -76,17 +76,17 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: spacing.sm },
+  row: { flexDirection: 'row', gap: spacing.sm, height: inputHeight },
   countryBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.card,
   },
   countryCode: { fontSize: fontSizes.md, color: colors.text, fontWeight: '600' },
   input: {
     flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
+    paddingHorizontal: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, maxHeight: '70%' },
