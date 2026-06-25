@@ -164,109 +164,82 @@ export default function LoginScreen() {
           <Tab label={trAuth.tabPhone} active={method === 'phone-otp'} onPress={() => { setMethod('phone-otp'); reset() }} />
         </View>
 
-        {method === 'password' && (
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder={trAuth.identifierPlaceholder}
-              placeholderTextColor={colors.muted}
-              value={identifier}
-              onChangeText={setIdentifier}
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder={trAuth.password}
-              placeholderTextColor={colors.muted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            {error ? <ErrorBox message={error} /> : null}
-            <PrimaryButton label={loading ? trAuth.signingIn : trAuth.signIn} onPress={handlePasswordLogin} disabled={loading} />
-          </View>
-        )}
+        <View style={styles.form}>
+          {/* Step 1: identifier input — hidden once OTP is sent */}
+          {!otpSent && (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder={
+                  method === 'password' ? trAuth.identifierPlaceholder
+                  : method === 'email-otp' ? 'you@example.com'
+                  : '+1 234 567 8900'
+                }
+                placeholderTextColor={colors.muted}
+                value={identifier}
+                onChangeText={setIdentifier}
+                autoCapitalize="none"
+                keyboardType={method === 'phone-otp' ? 'phone-pad' : method === 'email-otp' ? 'email-address' : 'default'}
+              />
+              {/* Password field — only for password method, keeps height consistent */}
+              <TextInput
+                style={[styles.input, method !== 'password' && styles.inputHidden]}
+                placeholder={trAuth.password}
+                placeholderTextColor={colors.muted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                editable={method === 'password'}
+              />
+            </>
+          )}
 
-        {method === 'email-otp' && (
-          <View style={styles.form}>
-            {!otpSent ? (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="you@example.com"
-                  placeholderTextColor={colors.muted}
-                  value={identifier}
-                  onChangeText={setIdentifier}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-                {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? trAuth.sending : trAuth.sendCode} onPress={handleSendEmailOtp} disabled={loading} />
-              </>
-            ) : (
-              <>
-                <View style={styles.sentNote}>
-                  <Ionicons name="mail-outline" size={18} color={colors.primary} />
-                  <Text style={styles.sentText}>{trAuth.codeSentEmail} <Text style={styles.sentEmail}>{identifier}</Text></Text>
-                </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder={trAuth.codePlaceholder}
-                  placeholderTextColor={colors.muted}
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                />
-                {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? trAuth.verifying : trAuth.verifySignIn} onPress={handleVerifyEmailOtp} disabled={loading} />
-                <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
-                  <Text style={styles.linkText}>{trAuth.changeEmail}</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        )}
+          {/* Step 2: OTP entry — shown after code is sent */}
+          {otpSent && (
+            <>
+              <View style={styles.sentNote}>
+                <Ionicons name={method === 'email-otp' ? 'mail-outline' : 'phone-portrait-outline'} size={18} color={colors.primary} />
+                <Text style={styles.sentText}>
+                  {method === 'email-otp' ? trAuth.codeSentEmail : trAuth.codeSentPhone}{' '}
+                  <Text style={styles.sentEmail}>{identifier}</Text>
+                </Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder={trAuth.codePlaceholder}
+                placeholderTextColor={colors.muted}
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                maxLength={6}
+              />
+              {/* Invisible spacer to match the height of the hidden password field */}
+              <View style={styles.inputHidden} />
+            </>
+          )}
 
-        {method === 'phone-otp' && (
-          <View style={styles.form}>
-            {!otpSent ? (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="+1 234 567 8900"
-                  placeholderTextColor={colors.muted}
-                  value={identifier}
-                  onChangeText={setIdentifier}
-                  keyboardType="phone-pad"
-                />
-                {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? trAuth.sending : trAuth.sendCode} onPress={handleSendPhoneOtp} disabled={loading} />
-              </>
-            ) : (
-              <>
-                <View style={styles.sentNote}>
-                  <Ionicons name="phone-portrait-outline" size={18} color={colors.primary} />
-                  <Text style={styles.sentText}>{trAuth.codeSentPhone} <Text style={styles.sentEmail}>{identifier}</Text></Text>
-                </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder={trAuth.codePlaceholder}
-                  placeholderTextColor={colors.muted}
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="number-pad"
-                  maxLength={6}
-                />
-                {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? trAuth.verifying : trAuth.verifySignIn} onPress={handleVerifyPhoneOtp} disabled={loading} />
-                <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
-                  <Text style={styles.linkText}>{trAuth.changePhone}</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        )}
+          {error ? <ErrorBox message={error} /> : null}
+
+          <PrimaryButton
+            disabled={loading}
+            onPress={
+              method === 'password' ? handlePasswordLogin
+              : otpSent ? (method === 'email-otp' ? handleVerifyEmailOtp : handleVerifyPhoneOtp)
+              : (method === 'email-otp' ? handleSendEmailOtp : handleSendPhoneOtp)
+            }
+            label={
+              method === 'password' ? (loading ? trAuth.signingIn : trAuth.signIn)
+              : otpSent ? (loading ? trAuth.verifying : trAuth.verifySignIn)
+              : (loading ? trAuth.sending : trAuth.sendCode)
+            }
+          />
+
+          {otpSent && (
+            <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
+              <Text style={styles.linkText}>{method === 'email-otp' ? trAuth.changeEmail : trAuth.changePhone}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         <TouchableOpacity style={styles.registerBtn} onPress={() => router.navigate('/sign-up')}>
           <Text style={styles.registerText}>{trAuth.noAccountYet} <Text style={styles.registerEmphasis}>{trAuth.createOne}</Text></Text>
@@ -313,8 +286,8 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#A5D6A7',
   },
   successText: { flex: 1, fontSize: fontSizes.sm, color: '#2e7d32' },
-  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 4, borderWidth: 1, borderColor: colors.border },
-  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.sm },
+  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border },
+  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.md - 4 },
   tabActive: { backgroundColor: colors.primary },
   tabText: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.muted },
   tabTextActive: { color: '#fff' },
@@ -323,6 +296,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
     padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
+  inputHidden: { opacity: 0, pointerEvents: 'none' as any },
   sentNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.softGreen, borderRadius: radius.md },
   sentText: { fontSize: fontSizes.sm, color: colors.text, flex: 1 },
   sentEmail: { fontWeight: '700', color: colors.primary },
