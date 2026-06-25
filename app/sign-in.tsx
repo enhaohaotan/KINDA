@@ -8,9 +8,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
 import { t, tAuth } from '../src/lib/i18n'
+import { PhoneInput } from '../src/components/ui/PhoneInput'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
-type Method = 'password' | 'email-otp'
+type Method = 'password' | 'email-otp' | 'phone-otp'
 
 export default function LoginScreen() {
   const { registered } = useLocalSearchParams<{ registered?: string }>()
@@ -20,6 +21,8 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false)
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
+  const [countryCode, setCountryCode] = useState('+1')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
@@ -103,6 +106,51 @@ export default function LoginScreen() {
     }
   }
 
+  async function handleSendPhoneOtp() {
+    setError('')
+    const fullPhone = `${countryCode}${phoneNumber.trim()}`
+    if (!phoneNumber.trim()) return
+    setLoading(true)
+    try {
+      const { error: e } = await supabase.auth.signInWithOtp({ phone: fullPhone })
+      if (e) throw e
+      setIdentifier(fullPhone)
+      setOtpSent(true)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleVerifyPhoneOtp() {
+    setError('')
+    if (!otp.trim()) return
+    setLoading(true)
+    try {
+      const { data, error: e } = await supabase.auth.verifyOtp({
+        phone: identifier.trim(),
+        token: otp.trim(),
+        type: 'sms',
+      })
+      if (e) throw e
+      if (data.user) {
+        setUser(data.user.id, data.user.email ?? '')
+        await loadSettings(data.user.id)
+        setOnboardingComplete()
+        router.replace('/(tabs)/home')
+      }
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const isPhone = method === 'phone-otp'
+  const isEmail = method === 'email-otp'
+  const isPassword = method === 'password'
+
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -118,25 +166,36 @@ export default function LoginScreen() {
         )}
 
         <View style={styles.tabs}>
-          <Tab label={trAuth.tabPassword} active={method === 'password'} onPress={() => { setMethod('password'); reset() }} />
-          <Tab label={trAuth.tabEmail} active={method === 'email-otp'} onPress={() => { setMethod('email-otp'); reset() }} />
+          <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => { setMethod('password'); reset() }} />
+          <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => { setMethod('email-otp'); reset() }} />
+          <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => { setMethod('phone-otp'); reset() }} />
         </View>
 
         <View style={styles.form}>
           {!otpSent && (
             <>
-              {/* Identifier — always shown */}
-              <TextInput
-                style={styles.input}
-                placeholder={method === 'password' ? trAuth.identifierPlaceholder : 'you@example.com'}
-                placeholderTextColor={colors.muted}
-                value={identifier}
-                onChangeText={setIdentifier}
-                autoCapitalize="none"
-                keyboardType={method === 'email-otp' ? 'email-address' : 'default'}
-              />
-              {/* Password row — always rendered to keep height stable; hidden on email tab */}
-              <View style={[styles.passwordRow, method !== 'password' && styles.hidden]}>
+              {/* Row 1: identifier or phone input */}
+              {isPhone ? (
+                <PhoneInput
+                  countryCode={countryCode}
+                  phone={phoneNumber}
+                  onChangeCountryCode={setCountryCode}
+                  onChangePhone={setPhoneNumber}
+                />
+              ) : (
+                <TextInput
+                  style={styles.input}
+                  placeholder={isPassword ? trAuth.identifierPlaceholder : 'you@example.com'}
+                  placeholderTextColor={colors.muted}
+                  value={identifier}
+                  onChangeText={setIdentifier}
+                  autoCapitalize="none"
+                  keyboardType={isEmail ? 'email-address' : 'default'}
+                />
+              )}
+
+              {/* Row 2: password (password tab) or invisible spacer (other tabs) */}
+              <View style={[styles.passwordRow, !isPassword && styles.hidden]}>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder={trAuth.password}
@@ -144,12 +203,12 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  editable={method === 'password'}
+                  editable={isPassword}
                 />
                 <TouchableOpacity
                   style={styles.eyeBtn}
                   onPress={() => setShowPassword((v) => !v)}
-                  disabled={method !== 'password'}
+                  disabled={!isPassword}
                 >
                   <Ionicons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -164,9 +223,9 @@ export default function LoginScreen() {
           {otpSent && (
             <>
               <View style={styles.sentNote}>
-                <Ionicons name="mail-outline" size={18} color={colors.primary} />
+                <Ionicons name={isEmail ? 'mail-outline' : 'phone-portrait-outline'} size={18} color={colors.primary} />
                 <Text style={styles.sentText}>
-                  {trAuth.codeSentEmail}{' '}
+                  {isEmail ? trAuth.codeSentEmail : trAuth.codeSentPhone}{' '}
                   <Text style={styles.sentEmail}>{identifier}</Text>
                 </Text>
               </View>
@@ -179,7 +238,7 @@ export default function LoginScreen() {
                 keyboardType="number-pad"
                 maxLength={6}
               />
-              {/* Spacer to match password row height */}
+              {/* Spacer to match password row */}
               <View style={styles.hidden} />
             </>
           )}
@@ -189,12 +248,12 @@ export default function LoginScreen() {
           <PrimaryButton
             disabled={loading}
             onPress={
-              method === 'password' ? handlePasswordLogin
-              : otpSent ? handleVerifyEmailOtp
-              : handleSendEmailOtp
+              isPassword ? handlePasswordLogin
+              : otpSent ? (isEmail ? handleVerifyEmailOtp : handleVerifyPhoneOtp)
+              : (isEmail ? handleSendEmailOtp : handleSendPhoneOtp)
             }
             label={
-              method === 'password' ? (loading ? trAuth.signingIn : trAuth.signIn)
+              isPassword ? (loading ? trAuth.signingIn : trAuth.signIn)
               : otpSent ? (loading ? trAuth.verifying : trAuth.verifySignIn)
               : (loading ? trAuth.sending : trAuth.sendCode)
             }
@@ -202,7 +261,7 @@ export default function LoginScreen() {
 
           {otpSent && (
             <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
-              <Text style={styles.linkText}>{trAuth.changeEmail}</Text>
+              <Text style={styles.linkText}>{isEmail ? trAuth.changeEmail : trAuth.changePhone}</Text>
             </TouchableOpacity>
           )}
         </View>
