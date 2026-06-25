@@ -6,24 +6,26 @@ import {
 import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
+import { useUserStore } from '../src/store/userStore'
+import { UI_LANGUAGES, TARGET_LANGUAGES, getTargetLabel, type LanguageCode } from '../src/data/languages'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 const COUNTRY_CODES = [
-  { code: '+1', label: '🇺🇸 United States' },
-  { code: '+44', label: '🇬🇧 United Kingdom' },
-  { code: '+45', label: '🇩🇰 Denmark' },
-  { code: '+46', label: '🇸🇪 Sweden' },
-  { code: '+47', label: '🇳🇴 Norway' },
-  { code: '+49', label: '🇩🇪 Germany' },
-  { code: '+33', label: '🇫🇷 France' },
-  { code: '+86', label: '🇨🇳 China' },
-  { code: '+852', label: '🇭🇰 Hong Kong' },
-  { code: '+886', label: '🇹🇼 Taiwan' },
-  { code: '+65', label: '🇸🇬 Singapore' },
-  { code: '+60', label: '🇲🇾 Malaysia' },
-  { code: '+61', label: '🇦🇺 Australia' },
-  { code: '+81', label: '🇯🇵 Japan' },
-  { code: '+82', label: '🇰🇷 South Korea' },
+  { code: '+1', label: 'United States' },
+  { code: '+44', label: 'United Kingdom' },
+  { code: '+45', label: 'Denmark' },
+  { code: '+46', label: 'Sweden' },
+  { code: '+47', label: 'Norway' },
+  { code: '+49', label: 'Germany' },
+  { code: '+33', label: 'France' },
+  { code: '+86', label: 'China' },
+  { code: '+852', label: 'Hong Kong' },
+  { code: '+886', label: 'Taiwan' },
+  { code: '+65', label: 'Singapore' },
+  { code: '+60', label: 'Malaysia' },
+  { code: '+61', label: 'Australia' },
+  { code: '+81', label: 'Japan' },
+  { code: '+82', label: 'South Korea' },
 ]
 
 export default function RegisterScreen() {
@@ -33,9 +35,12 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [uiLanguage, setUiLanguage] = useState<LanguageCode>('en')
+  const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('en')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCountryPicker, setShowCountryPicker] = useState(false)
+  const { setLanguages } = useUserStore()
 
   async function handleRegister() {
     setError('')
@@ -60,13 +65,18 @@ export default function RegisterScreen() {
       if (signUpError) throw signUpError
 
       if (data.user) {
-        // Save profile so we can look up by username/phone later
         await supabase.from('profiles').upsert({
           id: data.user.id,
           username: username.trim().toLowerCase(),
           email: email.trim().toLowerCase(),
           phone: fullPhone,
         })
+        await supabase.from('user_settings').upsert({
+          id: data.user.id,
+          ui_language: uiLanguage,
+          learning_language: learningLanguage,
+        })
+        setLanguages(uiLanguage, learningLanguage)
       }
 
       router.replace({ pathname: '/sign-in', params: { registered: '1' } })
@@ -127,6 +137,34 @@ export default function RegisterScreen() {
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
               />
+            </View>
+          </Field>
+
+          <Field label="I speak">
+            <View style={styles.langRow}>
+              {UI_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[styles.langOption, uiLanguage === lang.code && styles.langOptionSelected]}
+                  onPress={() => setUiLanguage(lang.code)}
+                >
+                  <Text style={[styles.langLabel, uiLanguage === lang.code && styles.langLabelSelected]}>{lang.labelNative}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Field>
+
+          <Field label="I want to learn">
+            <View style={styles.langRow}>
+              {TARGET_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[styles.langOption, learningLanguage === lang.code && styles.langOptionSelected]}
+                  onPress={() => setLearningLanguage(lang.code)}
+                >
+                  <Text style={[styles.langLabel, learningLanguage === lang.code && styles.langLabelSelected]}>{getTargetLabel(lang, uiLanguage)}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </Field>
 
@@ -260,4 +298,15 @@ const styles = StyleSheet.create({
   countryOptionSelected: { backgroundColor: colors.softGreen },
   countryOptionText: { fontSize: fontSizes.md, color: colors.text },
   countryOptionCode: { fontSize: fontSizes.md, color: colors.muted, fontWeight: '600' },
+  langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  langOption: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    borderRadius: radius.full, borderWidth: 1.5, borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  langOptionSelected: { borderColor: colors.primary, backgroundColor: colors.softGreen },
+  langFlag: { fontSize: fontSizes.lg },
+  langLabel: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.muted },
+  langLabelSelected: { color: colors.primary },
 })

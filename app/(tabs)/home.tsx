@@ -79,7 +79,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.recommendBadge}>
             <Text style={styles.recommendText}>
-              {learningLanguage === 'da' ? '🇩🇰' : learningLanguage === 'en' ? '🇬🇧' : ''}
+              {learningLanguage === 'da' ? 'DA' : learningLanguage === 'en' ? 'EN' : ''}
             </Text>
           </View>
         </View>

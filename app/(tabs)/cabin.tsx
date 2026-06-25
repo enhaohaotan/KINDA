@@ -57,14 +57,14 @@ export default function CabinScreen() {
             <View style={styles.langInfo}>
               <Text style={styles.settingLabel}>{tr.iSpeak}</Text>
               <Text style={styles.langValue}>
-                {uiLangLabel?.flag} {uiLangLabel?.labelNative}
+                {uiLangLabel?.labelNative}
               </Text>
             </View>
             <View style={styles.langDivider} />
             <View style={styles.langInfo}>
               <Text style={styles.settingLabel}>{tr.iLearn}</Text>
               <Text style={styles.langValue}>
-                {targetLangLabel?.flag} {targetLangLabel?.labelNative}
+                {targetLangLabel?.labelNative}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />

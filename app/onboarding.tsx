@@ -4,7 +4,7 @@ import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useUserStore } from '../src/store/userStore'
 import { Button } from '../src/components/ui/Button'
-import { UI_LANGUAGES, TARGET_LANGUAGES, type LanguageCode } from '../src/data/languages'
+import { UI_LANGUAGES, TARGET_LANGUAGES, getTargetLabel, type LanguageCode } from '../src/data/languages'
 import { t } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
@@ -55,7 +55,6 @@ export default function OnboardingScreen() {
                 style={[styles.option, uiLang === lang.code && styles.optionSelected]}
                 onPress={() => setUiLang(lang.code)}
               >
-                <Text style={styles.flag}>{lang.flag}</Text>
                 <Text style={[styles.optionText, uiLang === lang.code && styles.optionTextSelected]}>
                   {lang.labelNative}
                 </Text>
@@ -74,9 +73,8 @@ export default function OnboardingScreen() {
                 style={[styles.option, targetLang === lang.code && styles.optionSelected]}
                 onPress={() => setTargetLang(lang.code)}
               >
-                <Text style={styles.flag}>{lang.flag}</Text>
                 <Text style={[styles.optionText, targetLang === lang.code && styles.optionTextSelected]}>
-                  {lang.labelNative}
+                  {getTargetLabel(lang, uiLang)}
                 </Text>
                 {targetLang === lang.code && <Ionicons name="checkmark-circle" size={18} color={colors.primary} />}
               </TouchableOpacity>

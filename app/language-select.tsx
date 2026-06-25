@@ -4,7 +4,7 @@ import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useUserStore } from '../src/store/userStore'
 import { Button } from '../src/components/ui/Button'
-import { UI_LANGUAGES, TARGET_LANGUAGES, type LanguageCode } from '../src/data/languages'
+import { UI_LANGUAGES, TARGET_LANGUAGES, getTargetLabel, type LanguageCode } from '../src/data/languages'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 type Props = {
@@ -40,14 +40,10 @@ export default function LanguageSelectScreen() {
               style={[styles.option, selectedUI === lang.code && styles.optionSelected]}
               onPress={() => setSelectedUI(lang.code)}
             >
-              <Text style={styles.flag}>{lang.flag}</Text>
               <View style={styles.optionText}>
                 <Text style={[styles.optionLabel, selectedUI === lang.code && styles.optionLabelSelected]}>
                   {lang.labelNative}
                 </Text>
-                {lang.labelNative !== lang.label && (
-                  <Text style={styles.optionSub}>{lang.label}</Text>
-                )}
               </View>
               {selectedUI === lang.code && (
                 <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
@@ -66,14 +62,10 @@ export default function LanguageSelectScreen() {
               style={[styles.option, selectedTarget === lang.code && styles.optionSelected]}
               onPress={() => setSelectedTarget(lang.code)}
             >
-              <Text style={styles.flag}>{lang.flag}</Text>
               <View style={styles.optionText}>
                 <Text style={[styles.optionLabel, selectedTarget === lang.code && styles.optionLabelSelected]}>
-                  {lang.labelNative}
+                  {getTargetLabel(lang, selectedUI)}
                 </Text>
-                {lang.labelNative !== lang.label && (
-                  <Text style={styles.optionSub}>{lang.label}</Text>
-                )}
               </View>
               {selectedTarget === lang.code && (
                 <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
