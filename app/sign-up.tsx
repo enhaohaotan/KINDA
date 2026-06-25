@@ -38,7 +38,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [uiLanguage, setUiLanguage] = useState<LanguageCode>(detectUILanguage)
-  const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('da')
+  const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('en')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCountryPicker, setShowCountryPicker] = useState(false)

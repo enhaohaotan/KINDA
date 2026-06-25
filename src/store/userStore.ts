@@ -21,7 +21,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   userId: null,
   email: null,
   uiLanguage: detectUILanguage(),
-  learningLanguage: 'da',
+  learningLanguage: 'en',
   onboardingComplete: false,
 
   setUser: (userId, email) => set({ userId, email }),
