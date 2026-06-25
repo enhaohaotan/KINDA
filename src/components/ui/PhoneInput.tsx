@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, Modal, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
 import { getCountries, getCountryCallingCode, getExampleNumber, type CountryCode } from 'libphonenumber-js'
 import examples from 'libphonenumber-js/examples.mobile.json'
 import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
@@ -27,7 +28,7 @@ type Props = {
 }
 
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
-  const [showPicker, setShowPicker] = useState(false)
+  const sheetRef = useRef<BottomSheet>(null)
   const [search, setSearch] = useState('')
   const countries = useMemo(buildCountryList, [])
 
@@ -48,15 +49,26 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
       )
     : countries
 
+  const snapPoints = useMemo(() => ['70%'], [])
+
+  const renderBackdrop = useCallback(
+    (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />,
+    []
+  )
+
+  function open() {
+    sheetRef.current?.expand()
+  }
+
   function close() {
-    setShowPicker(false)
+    sheetRef.current?.close()
     setSearch('')
   }
 
   return (
     <>
       <View style={styles.row}>
-        <TouchableOpacity style={styles.countryBtn} onPress={() => setShowPicker(true)}>
+        <TouchableOpacity style={styles.countryBtn} onPress={open}>
           <Text style={styles.countryCode}>{countryCode}</Text>
           <Ionicons name="chevron-down" size={14} color={colors.muted} />
         </TouchableOpacity>
@@ -70,63 +82,60 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         />
       </View>
 
-      <Modal visible={showPicker} animationType="none" transparent onRequestClose={close}>
-        {/* Overlay stays fixed — fade animation applies to the whole modal but
-            the overlay covers the screen from the start, so it never "slides" */}
-        <View style={styles.overlay}>
-          {/* Tap outside to dismiss */}
-          <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={close} activeOpacity={1} />
+      <BottomSheet
+        ref={sheetRef}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose
+        backdropComponent={renderBackdrop}
+        onClose={() => setSearch('')}
+        backgroundStyle={styles.sheetBg}
+        handleIndicatorStyle={styles.handle}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="restore"
+      >
+        <BottomSheetView style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>Country code</Text>
+          <TouchableOpacity onPress={close}>
+            <Ionicons name="close" size={22} color={colors.text} />
+          </TouchableOpacity>
+        </BottomSheetView>
 
-          {/* Sheet slides up from bottom independently via its own position */}
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.sheet}
-          >
-            <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Country code</Text>
-              <TouchableOpacity onPress={close}>
-                <Ionicons name="close" size={22} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Search stays fixed at top — list scrolls below it */}
-            <View style={styles.searchWrap}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search"
-                placeholderTextColor={colors.muted}
-                value={search}
-                onChangeText={setSearch}
-                autoCorrect={false}
-              />
-              <View style={styles.searchIconLeft} pointerEvents="none">
-                <Ionicons name="search-outline" size={16} color={colors.muted} />
-              </View>
-              {search.length > 0 && (
-                <TouchableOpacity style={styles.searchClear} onPress={() => setSearch('')}>
-                  <Ionicons name="close-circle" size={16} color={colors.muted} />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <FlatList
-              data={filtered}
-              keyboardShouldPersistTaps="handled"
-              keyExtractor={(item) => item.iso}
-              style={styles.list}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.option, countryCode === item.dialCode && styles.optionSelected]}
-                  onPress={() => { onChangeCountryCode(item.dialCode); close() }}
-                >
-                  <Text style={styles.optionLabel}>{item.name}</Text>
-                  <Text style={styles.optionCode}>{item.dialCode}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </KeyboardAvoidingView>
+        <View style={styles.searchWrap}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            placeholderTextColor={colors.muted}
+            value={search}
+            onChangeText={setSearch}
+            autoCorrect={false}
+          />
+          <View style={styles.searchIconLeft} pointerEvents="none">
+            <Ionicons name="search-outline" size={16} color={colors.muted} />
+          </View>
+          {search.length > 0 && (
+            <TouchableOpacity style={styles.searchClear} onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={16} color={colors.muted} />
+            </TouchableOpacity>
+          )}
         </View>
-      </Modal>
+
+        <FlatList
+          data={filtered}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.iso}
+          style={styles.list}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.option, countryCode === item.dialCode && styles.optionSelected]}
+              onPress={() => { onChangeCountryCode(item.dialCode); close() }}
+            >
+              <Text style={styles.optionLabel}>{item.name}</Text>
+              <Text style={styles.optionCode}>{item.dialCode}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </BottomSheet>
     </>
   )
 }
@@ -144,20 +153,11 @@ const styles = StyleSheet.create({
     flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
     padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    height: '70%',
-  },
+  sheetBg: { backgroundColor: colors.card },
+  handle: { backgroundColor: colors.border },
   sheetHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: spacing.lg, paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg, paddingBottom: spacing.md,
   },
   sheetTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.text },
   searchWrap: { position: 'relative', marginHorizontal: spacing.lg, marginBottom: spacing.sm },
