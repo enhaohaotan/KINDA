@@ -4,14 +4,12 @@ import { router } from 'expo-router'
 import { Button } from '../src/components/ui/Button'
 import { WritingFixResult } from '../src/components/learning/WritingFixResult'
 import { useLearningStore } from '../src/store/learningStore'
-import { useUserStore } from '../src/store/userStore'
 import { ai } from '../src/lib/ai'
 import type { FixWritingResult } from '../src/lib/ai'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 export default function WritingFixScreen() {
   const { activeExpression, updateStatus } = useLearningStore()
-  const { level } = useUserStore()
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<FixWritingResult | null>(null)
@@ -22,7 +20,7 @@ export default function WritingFixScreen() {
     setLoading(true)
     setSubmittedText(text.trim())
     try {
-      const res = await ai.fixWriting(text.trim(), activeExpression.text, level)
+      const res = await ai.fixWriting(text.trim(), activeExpression.text)
       setResult(res)
       updateStatus(activeExpression.id, { tried: true })
     } catch {

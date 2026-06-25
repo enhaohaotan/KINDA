@@ -13,21 +13,21 @@ import { colors, fontSizes, spacing, radius } from '../../src/styles/tokens'
 
 export default function CabinScreen() {
   const { statuses } = useLearningStore()
-  const { clearUser, level, uiLanguage, targetLanguage } = useUserStore()
+  const { clearUser, uiLanguage, learningLanguage } = useUserStore()
   const tr = t(uiLanguage)
 
-  const exprs = getExpressions(targetLanguage as any)
+  const exprs = getExpressions(learningLanguage as any)
   const seenCount = exprs.filter((e) => statuses[e.id]?.seen).length
   const triedCount = exprs.filter((e) => statuses[e.id]?.tried).length
   const savedCount = exprs.filter((e) => statuses[e.id]?.saved).length
 
   const uiLangLabel = UI_LANGUAGES.find((l) => l.code === uiLanguage)
-  const targetLangLabel = TARGET_LANGUAGES.find((l) => l.code === targetLanguage)
+  const targetLangLabel = TARGET_LANGUAGES.find((l) => l.code === learningLanguage)
 
   async function handleSignOut() {
     await supabase.auth.signOut()
     clearUser()
-    router.replace('/login')
+    router.replace('/sign-in')
   }
 
   const seenLabel = uiLanguage === 'zh' ? '见过' : 'Seen'

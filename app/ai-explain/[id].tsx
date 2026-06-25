@@ -6,7 +6,6 @@ import { Button } from '../../src/components/ui/Button'
 import { useLearningStore } from '../../src/store/learningStore'
 import { expressions } from '../../src/data/expressions'
 import { ai } from '../../src/lib/ai'
-import { useUserStore } from '../../src/store/userStore'
 import { colors, fontSizes, spacing, radius } from '../../src/styles/tokens'
 
 type Message = { id: string; text: string; sender: 'user' | 'ai' }
@@ -21,7 +20,6 @@ const QUICK_QUESTIONS = [
 export default function AIExplainScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const expr = expressions.find((e) => e.id === id)
-  const { level } = useUserStore()
   const { updateStatus } = useLearningStore()
 
   const [messages, setMessages] = useState<Message[]>([
@@ -42,7 +40,7 @@ export default function AIExplainScreen() {
     setInput('')
     setLoading(true)
     try {
-      const result = await ai.explainExpression(expr.text, text, level)
+      const result = await ai.explainExpression(expr.text, text)
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',

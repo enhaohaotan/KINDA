@@ -7,27 +7,27 @@ import { useUserStore } from '../../src/store/userStore'
 import { getExpressions, getMeaning, getUsage, t } from '../../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../../src/styles/tokens'
 
-function getTodayExpression(targetLanguage: string) {
-  const exprs = getExpressions(targetLanguage as any)
+function getTodayExpression(learningLanguage: string) {
+  const exprs = getExpressions(learningLanguage as any)
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
   return exprs[dayOfYear % exprs.length]
 }
 
 export default function HomeScreen() {
   const { todayExpression, setTodayExpression, setActiveExpression, updateStatus, getStatus, statuses } = useLearningStore()
-  const { uiLanguage, targetLanguage } = useUserStore()
+  const { uiLanguage, learningLanguage } = useUserStore()
   const tr = t(uiLanguage)
 
   useEffect(() => {
-    const expr = getTodayExpression(targetLanguage)
+    const expr = getTodayExpression(learningLanguage)
     setTodayExpression(expr)
     setActiveExpression(expr)
     updateStatus(expr.id, { seen: true, lastSeenAt: new Date().toISOString() })
-  }, [targetLanguage])
+  }, [learningLanguage])
 
   if (!todayExpression) return null
   const status = getStatus(todayExpression.id)
-  const seenCount = getExpressions(targetLanguage as any).filter((e) => statuses[e.id]?.seen).length
+  const seenCount = getExpressions(learningLanguage as any).filter((e) => statuses[e.id]?.seen).length
 
   function handleExplain() {
     setActiveExpression(todayExpression!)
@@ -79,7 +79,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.recommendBadge}>
             <Text style={styles.recommendText}>
-              {targetLanguage === 'da' ? '🇩🇰' : targetLanguage === 'en' ? '🇬🇧' : ''}
+              {learningLanguage === 'da' ? '🇩🇰' : learningLanguage === 'en' ? '🇬🇧' : ''}
             </Text>
           </View>
         </View>

@@ -8,38 +8,18 @@ import { UI_LANGUAGES, TARGET_LANGUAGES, type LanguageCode } from '../src/data/l
 import { t } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
-const LEVELS_ZH = ['刚开始', '能看懂一点', '能聊天但不自然', '想学得更地道']
-const LEVELS_EN = ['Just starting', 'Can understand a little', 'Can chat but not natural', 'Want to sound more fluent']
-const LEVEL_IDS = ['beginner', 'lower_intermediate', 'intermediate', 'advanced'] as const
-
-const INTERESTS = [
-  { id: 'daily', labelZh: '日常聊天', labelEn: 'Daily chat', emoji: '💬' },
-  { id: 'work', labelZh: '工作学习', labelEn: 'Work & study', emoji: '💼' },
-  { id: 'travel', labelZh: '旅行生活', labelEn: 'Travel & life', emoji: '✈️' },
-  { id: 'entertainment', labelZh: '影视游戏', labelEn: 'Movies & games', emoji: '🎮' },
-]
-
-type Level = typeof LEVEL_IDS[number]
-
 export default function OnboardingScreen() {
   const [step, setStep] = useState(0)
   const [uiLang, setUiLang] = useState<LanguageCode>('en')
   const [targetLang, setTargetLang] = useState<LanguageCode>('en')
-  const [level, setLevel] = useState<Level>('intermediate')
-  const [interests, setInterests] = useState<string[]>([])
-  const { setPreferences, setLanguages, setOnboardingComplete } = useUserStore()
+  const { setLanguages, setOnboardingComplete, saveSettings } = useUserStore()
 
   const tr = t(uiLang)
-  const levels = uiLang === 'zh' ? LEVELS_ZH : LEVELS_EN
-
-  function toggleInterest(id: string) {
-    setInterests((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id])
-  }
 
   function finish() {
     setLanguages(uiLang, targetLang)
-    setPreferences(level, interests)
     setOnboardingComplete()
+    saveSettings()
     router.replace('/(tabs)/home')
   }
 
@@ -104,54 +84,10 @@ export default function OnboardingScreen() {
           </View>
         </View>
 
-        <Button label={tr.nextBtn} onPress={() => setStep(2)} style={styles.nextBtn} />
+        <Button label={tr.enterBtn} onPress={finish} style={styles.nextBtn} />
       </View>
     )
   }
-
-  // Step 2: Level
-  if (step === 2) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.question}>{tr.levelQuestion}</Text>
-        <View style={styles.options}>
-          {LEVEL_IDS.map((id, i) => (
-            <TouchableOpacity
-              key={id}
-              style={[styles.option, level === id && styles.optionSelected]}
-              onPress={() => setLevel(id)}
-            >
-              <Text style={[styles.optionText, level === id && styles.optionTextSelected]}>{levels[i]}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Button label={tr.nextBtn} onPress={() => setStep(3)} style={styles.nextBtn} />
-      </View>
-    )
-  }
-
-  // Step 3: Interests
-  return (
-    <View style={styles.container}>
-      <Text style={styles.question}>{tr.interestQuestion}</Text>
-      <Text style={styles.subtext}>{tr.multiSelect}</Text>
-      <View style={styles.options}>
-        {INTERESTS.map((i) => (
-          <TouchableOpacity
-            key={i.id}
-            style={[styles.option, interests.includes(i.id) && styles.optionSelected]}
-            onPress={() => toggleInterest(i.id)}
-          >
-            <Text style={styles.flag}>{i.emoji}</Text>
-            <Text style={[styles.optionText, interests.includes(i.id) && styles.optionTextSelected]}>
-              {uiLang === 'zh' ? i.labelZh : i.labelEn}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Button label={tr.enterBtn} onPress={finish} style={styles.nextBtn} />
-    </View>
-  )
 }
 
 const styles = StyleSheet.create({

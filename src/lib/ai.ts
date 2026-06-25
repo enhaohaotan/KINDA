@@ -34,14 +34,14 @@ async function invoke<T>(fn: string, body: object): Promise<T> {
 }
 
 export const ai = {
-  explainExpression: (expression: string, userQuestion: string, userLevel: string) =>
-    invoke<ExplainExpressionResult>('explain-expression', { expression, userQuestion, userLevel }),
+  explainExpression: (expression: string, userQuestion: string) =>
+    invoke<ExplainExpressionResult>('explain-expression', { expression, userQuestion }),
 
-  fixWriting: (userText: string, targetExpression: string, userLevel: string) =>
-    invoke<FixWritingResult>('fix-writing', { userText, targetExpression, userLevel }),
+  fixWriting: (userText: string, targetExpression: string) =>
+    invoke<FixWritingResult>('fix-writing', { userText, targetExpression }),
 
-  generateStory: (targetExpression: string, themes: string[], length: string, userLevel: string) =>
-    invoke<GenerateStoryResult>('generate-story', { targetExpression, themes, length, userLevel }),
+  generateStory: (targetExpression: string, themes: string[], length: string) =>
+    invoke<GenerateStoryResult>('generate-story', { targetExpression, themes, length }),
 
   sceneFeedback: (sceneId: string, aiLine: string, userReply: string, targetExpression: string) =>
     invoke<SceneFeedbackResult>('scene-feedback', { sceneId, aiLine, userReply, targetExpression }),

@@ -4,7 +4,6 @@ import { router } from 'expo-router'
 import { Button } from '../src/components/ui/Button'
 import { StoryResult } from '../src/components/learning/StoryResult'
 import { useLearningStore } from '../src/store/learningStore'
-import { useUserStore } from '../src/store/userStore'
 import { ai } from '../src/lib/ai'
 import { storyThemes, storyLengths } from '../src/data/themes'
 import type { GenerateStoryResult } from '../src/lib/ai'
@@ -12,7 +11,6 @@ import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 export default function StoryScreen() {
   const { activeExpression } = useLearningStore()
-  const { level } = useUserStore()
   const [selectedThemes, setSelectedThemes] = useState<string[]>([])
   const [selectedLength, setSelectedLength] = useState('normal')
   const [loading, setLoading] = useState(false)
@@ -32,7 +30,7 @@ export default function StoryScreen() {
       const themes = selectedThemes.length > 0
         ? displayThemes.filter((t) => selectedThemes.includes(t.id)).map((t) => t.labelZh)
         : ['日常']
-      const res = await ai.generateStory(activeExpression.text, themes, selectedLength, level)
+      const res = await ai.generateStory(activeExpression.text, themes, selectedLength)
       setResult(res)
     } catch {
       // silent fail

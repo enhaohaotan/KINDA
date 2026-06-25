@@ -3,8 +3,8 @@ import { expressionsDa } from '../data/expressions-da'
 import { TRANSLATIONS, type LanguageCode } from '../data/languages'
 import type { Expression } from '../data/expressions'
 
-export function getExpressions(targetLanguage: LanguageCode): Expression[] {
-  if (targetLanguage === 'da') return expressionsDa
+export function getExpressions(learningLanguage: LanguageCode): Expression[] {
+  if (learningLanguage === 'da') return expressionsDa
   return expressions
 }
 

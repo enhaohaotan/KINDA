@@ -12,12 +12,13 @@ type Props = {
 }
 
 export default function LanguageSelectScreen() {
-  const { uiLanguage, targetLanguage, setLanguages } = useUserStore()
+  const { uiLanguage, learningLanguage, setLanguages, saveSettings } = useUserStore()
   const [selectedUI, setSelectedUI] = useState<LanguageCode>(uiLanguage)
-  const [selectedTarget, setSelectedTarget] = useState<LanguageCode>(targetLanguage)
+  const [selectedTarget, setSelectedTarget] = useState<LanguageCode>(learningLanguage)
 
   function handleSave() {
     setLanguages(selectedUI, selectedTarget)
+    saveSettings()
     router.back()
   }
 
