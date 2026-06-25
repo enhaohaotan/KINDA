@@ -9,7 +9,7 @@ import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
 import { t, tAuth } from '../src/lib/i18n'
 import { PhoneInput } from '../src/components/ui/PhoneInput'
-import { colors, fontSizes, spacing, radius, inputHeight } from '../src/styles/tokens'
+import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 type Method = 'password' | 'email-otp' | 'phone-otp'
 
@@ -23,7 +23,6 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [passwordFocused, setPasswordFocused] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
@@ -173,68 +172,63 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          {/* Fixed height = 2 rows + gap — never shifts regardless of which tab is active */}
-          <View style={styles.inputArea}>
-            {!otpSent && (
-              <>
-                {isPhone ? (
-                  <PhoneInput
-                    countryCode={countryCode}
-                    phone={phoneNumber}
-                    onChangeCountryCode={setCountryCode}
-                    onChangePhone={setPhoneNumber}
-                  />
-                ) : (
-                  <TextInput
-                    style={styles.input}
-                    placeholder={isPassword ? trAuth.identifierPlaceholder : 'you@example.com'}
-                    placeholderTextColor={colors.muted}
-                    value={identifier}
-                    onChangeText={setIdentifier}
-                    autoCapitalize="none"
-                    keyboardType={isEmail ? 'email-address' : 'default'}
-                  />
-                )}
-                {isPassword && (
-                  <View style={[styles.passwordRow, passwordFocused && styles.passwordRowFocused]}>
-                    <TextInput
-                      style={styles.passwordInput}
-                      placeholder={trAuth.password}
-                      placeholderTextColor={colors.muted}
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!showPassword}
-                      onFocus={() => setPasswordFocused(true)}
-                      onBlur={() => setPasswordFocused(false)}
-                    />
-                    <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword((v) => !v)}>
-                      <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.muted} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </>
-            )}
-            {otpSent && (
-              <>
-                <View style={styles.sentNote}>
-                  <Ionicons name={isEmail ? 'mail-outline' : 'phone-portrait-outline'} size={18} color={colors.primary} />
-                  <Text style={styles.sentText}>
-                    {isEmail ? trAuth.codeSentEmail : trAuth.codeSentPhone}{' '}
-                    <Text style={styles.sentEmail}>{identifier}</Text>
-                  </Text>
-                </View>
+          {!otpSent && (
+            <>
+              {isPhone ? (
+                <PhoneInput
+                  countryCode={countryCode}
+                  phone={phoneNumber}
+                  onChangeCountryCode={setCountryCode}
+                  onChangePhone={setPhoneNumber}
+                />
+              ) : (
                 <TextInput
                   style={styles.input}
-                  placeholder={trAuth.codePlaceholder}
+                  placeholder={isPassword ? trAuth.identifierPlaceholder : 'you@example.com'}
                   placeholderTextColor={colors.muted}
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="number-pad"
-                  maxLength={6}
+                  value={identifier}
+                  onChangeText={setIdentifier}
+                  autoCapitalize="none"
+                  keyboardType={isEmail ? 'email-address' : 'default'}
                 />
-              </>
-            )}
-          </View>
+              )}
+              {isPassword && (
+                <View style={styles.passwordWrap}>
+                  <TextInput
+                    style={[styles.input, styles.passwordInput]}
+                    placeholder={trAuth.password}
+                    placeholderTextColor={colors.muted}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword((v) => !v)}>
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.muted} />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+          {otpSent && (
+            <>
+              <View style={styles.sentNote}>
+                <Ionicons name={isEmail ? 'mail-outline' : 'phone-portrait-outline'} size={18} color={colors.primary} />
+                <Text style={styles.sentText}>
+                  {isEmail ? trAuth.codeSentEmail : trAuth.codeSentPhone}{' '}
+                  <Text style={styles.sentEmail}>{identifier}</Text>
+                </Text>
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder={trAuth.codePlaceholder}
+                placeholderTextColor={colors.muted}
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="number-pad"
+                maxLength={6}
+              />
+            </>
+          )}
 
           {error ? <ErrorBox message={error} /> : null}
 
@@ -310,26 +304,13 @@ const styles = StyleSheet.create({
   tabText: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.muted },
   tabTextActive: { color: '#fff' },
   form: { gap: spacing.md },
-  inputArea: { gap: spacing.md, height: inputHeight * 2 + spacing.md },
   input: {
-    height: inputHeight,
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
+    padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
-  passwordRow: {
-    height: inputHeight,
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    backgroundColor: colors.card,
-    paddingLeft: spacing.md,
-  },
-  passwordRowFocused: { borderColor: '#4A90D9' },
-  passwordInput: {
-    flex: 1, height: '100%',
-    fontSize: fontSizes.md, color: colors.text,
-    outlineStyle: 'none' as any,
-  },
-  eyeBtn: { padding: spacing.md },
+  passwordWrap: { position: 'relative' },
+  passwordInput: { paddingRight: spacing.xl + spacing.lg },
+  eyeBtn: { position: 'absolute', right: 0, top: 0, bottom: 0, paddingHorizontal: spacing.md, justifyContent: 'center' },
   sentNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.softGreen, borderRadius: radius.md },
   sentText: { fontSize: fontSizes.sm, color: colors.text, flex: 1 },
   sentEmail: { fontWeight: '700', color: colors.primary },

@@ -26,8 +26,6 @@ export const spacing = {
   xxl: 48,
 }
 
-export const inputHeight = 52
-
 export const fontSizes = {
   xs: 12,
   sm: 14,

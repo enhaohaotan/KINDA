@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { getCountries, getCountryCallingCode, type CountryCode } from 'libphonenumber-js'
-import { colors, fontSizes, spacing, radius, inputHeight } from '../../styles/tokens'
+import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
 
 type CountryEntry = { iso: CountryCode; dialCode: string; name: string }
 
@@ -76,7 +76,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: spacing.sm, height: inputHeight },
+  row: { flexDirection: 'row', gap: spacing.sm },
   countryBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
