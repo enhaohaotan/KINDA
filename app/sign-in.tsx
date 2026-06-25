@@ -23,20 +23,21 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const slideAnim = useRef(new Animated.Value(0)).current
   const METHODS: Method[] = ['password', 'email-otp', 'phone-otp']
+  const [tabContainerWidth, setTabContainerWidth] = useState(0)
+  const tabSlide = useRef(new Animated.Value(0)).current
 
   function switchMethod(newMethod: Method) {
-    const direction = METHODS.indexOf(newMethod) > METHODS.indexOf(method) ? 60 : -60
-    slideAnim.setValue(direction)
-    setMethod(newMethod)
-    reset()
-    Animated.spring(slideAnim, {
-      toValue: 0,
+    const index = METHODS.indexOf(newMethod)
+    const tabWidth = tabContainerWidth / METHODS.length
+    Animated.spring(tabSlide, {
+      toValue: index * tabWidth,
       useNativeDriver: true,
       tension: 300,
       friction: 30,
     }).start()
+    setMethod(newMethod)
+    reset()
   }
 
   const [loading, setLoading] = useState(false)
@@ -181,13 +182,17 @@ export default function LoginScreen() {
           </View>
         )}
 
-        <View style={styles.tabs}>
+        <View
+          style={styles.tabs}
+          onLayout={(e) => setTabContainerWidth(e.nativeEvent.layout.width - 6)}
+        >
+          <Animated.View style={[styles.tabPill, { width: `${100 / METHODS.length}%` as any, transform: [{ translateX: tabSlide }] }]} />
           <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => switchMethod('password')} />
           <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => switchMethod('email-otp')} />
           <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => switchMethod('phone-otp')} />
         </View>
 
-        <Animated.View style={[styles.form, { transform: [{ translateX: slideAnim }] }]}>
+        <View style={styles.form}>
           {!otpSent && (
             <>
               {isPhone ? (
@@ -267,7 +272,7 @@ export default function LoginScreen() {
               <Text style={styles.linkText}>{isEmail ? trAuth.changeEmail : trAuth.changePhone}</Text>
             </TouchableOpacity>
           )}
-        </Animated.View>
+        </View>
 
         <Text style={styles.registerText}>
           {trAuth.noAccountYet}{' '}
@@ -315,9 +320,10 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#A5D6A7',
   },
   successText: { flex: 1, fontSize: fontSizes.sm, color: '#2e7d32' },
-  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border },
-  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.md - 4 },
-  tabActive: { backgroundColor: colors.primary },
+  tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 3, borderWidth: 1, borderColor: colors.border, position: 'relative' },
+  tabPill: { position: 'absolute', top: 3, bottom: 3, left: 3, backgroundColor: colors.primary, borderRadius: radius.md - 4 },
+  tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.md - 4, zIndex: 1 },
+  tabActive: {},
   tabText: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.muted },
   tabTextActive: { color: '#fff' },
   form: { gap: spacing.md },
