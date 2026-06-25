@@ -1,4 +1,4 @@
-import type { LanguageCode } from '../languages'
+import type { LanguageCode } from '../data/languages'
 
 export type CommonTranslations = {
   appTagline: string
