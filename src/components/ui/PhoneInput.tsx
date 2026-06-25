@@ -70,11 +70,6 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         />
       </View>
 
-      {/* Backdrop — instant, no animation */}
-      <Modal visible={showPicker} transparent animationType="none">
-        <View style={styles.backdrop} pointerEvents="none" />
-      </Modal>
-
       {/* Sheet — slides up; tap above sheet to dismiss */}
       <Modal visible={showPicker} transparent animationType="slide" onRequestClose={close}>
         <View style={styles.sheetContainer}>
@@ -143,10 +138,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
     padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheetContainer: { flex: 1, justifyContent: 'flex-end' },
   sheetDismissArea: { flex: 1 },

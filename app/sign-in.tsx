@@ -269,9 +269,10 @@ export default function LoginScreen() {
           )}
         </Animated.View>
 
-        <TouchableOpacity style={styles.registerBtn} onPress={() => router.navigate('/sign-up')}>
-          <Text style={styles.registerText}>{trAuth.noAccountYet} <Text style={styles.registerEmphasis}>{trAuth.createOne}</Text></Text>
-        </TouchableOpacity>
+        <Text style={styles.registerText}>
+          {trAuth.noAccountYet}{' '}
+          <Text style={styles.registerEmphasis} onPress={() => router.navigate('/sign-up')}>{trAuth.createOne}</Text>
+        </Text>
 
       </ScrollView>
     </KeyboardAvoidingView>
@@ -337,7 +338,6 @@ const styles = StyleSheet.create({
   primaryBtnText: { color: '#fff', fontSize: fontSizes.md, fontWeight: '700' },
   linkBtn: { alignItems: 'center', paddingVertical: spacing.xs },
   linkText: { fontSize: fontSizes.sm, color: colors.muted },
-  registerBtn: { alignItems: 'center', paddingVertical: spacing.sm },
-  registerText: { fontSize: fontSizes.sm, color: colors.muted },
+  registerText: { fontSize: fontSizes.sm, color: colors.muted, textAlign: 'center', paddingVertical: spacing.sm },
   registerEmphasis: { color: colors.primary, fontWeight: '600' },
 })
