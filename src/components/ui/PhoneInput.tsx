@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView, BottomSheetFlatList } from '@gorhom/bottom-sheet'
 import { getCountries, getCountryCallingCode, getExampleNumber, type CountryCode } from 'libphonenumber-js'
 import examples from 'libphonenumber-js/examples.mobile.json'
 import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
@@ -52,7 +52,9 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
   const snapPoints = useMemo(() => ['70%'], [])
 
   const renderBackdrop = useCallback(
-    (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />,
+    (props: any) => (
+      <TouchableOpacity style={[props.style, styles.backdrop]} onPress={close} activeOpacity={1} />
+    ),
     []
   )
 
@@ -119,7 +121,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
           )}
         </View>
 
-        <FlatList
+        <BottomSheetFlatList
           data={filtered}
           keyboardShouldPersistTaps="handled"
           keyExtractor={(item) => item.iso}
@@ -167,6 +169,7 @@ const styles = StyleSheet.create({
   },
   searchIconLeft: { position: 'absolute', left: spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
   searchClear: { position: 'absolute', right: spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
+  backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
   list: { flex: 1 },
   option: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
