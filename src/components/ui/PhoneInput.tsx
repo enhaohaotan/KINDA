@@ -27,7 +27,14 @@ type Props = {
 
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
   const [showPicker, setShowPicker] = useState(false)
+  const [search, setSearch] = useState('')
   const countries = useMemo(buildCountryList, [])
+  const filtered = search.trim()
+    ? countries.filter((c) =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.dialCode.includes(search)
+      )
+    : countries
 
   return (
     <>
@@ -46,22 +53,39 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         />
       </View>
 
-      <Modal visible={showPicker} animationType="slide" transparent>
+      <Modal visible={showPicker} animationType="slide" transparent onRequestClose={() => setShowPicker(false)}>
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Country code</Text>
-              <TouchableOpacity onPress={() => setShowPicker(false)}>
+              <TouchableOpacity onPress={() => { setShowPicker(false); setSearch('') }}>
                 <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
+            <View style={styles.searchRow}>
+              <Ionicons name="search-outline" size={16} color={colors.muted} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search"
+                placeholderTextColor={colors.muted}
+                value={search}
+                onChangeText={setSearch}
+                autoCorrect={false}
+              />
+              {search.length > 0 && (
+                <TouchableOpacity onPress={() => setSearch('')}>
+                  <Ionicons name="close-circle" size={16} color={colors.muted} />
+                </TouchableOpacity>
+              )}
+            </View>
             <FlatList
-              data={countries}
+              data={filtered}
+              keyboardShouldPersistTaps="handled"
               keyExtractor={(item) => item.iso}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[styles.option, countryCode === item.dialCode && styles.optionSelected]}
-                  onPress={() => { onChangeCountryCode(item.dialCode); setShowPicker(false) }}
+                  onPress={() => { onChangeCountryCode(item.dialCode); setShowPicker(false); setSearch('') }}
                 >
                   <Text style={styles.optionLabel}>{item.name}</Text>
                   <Text style={styles.optionCode}>{item.dialCode}</Text>
@@ -90,7 +114,15 @@ const styles = StyleSheet.create({
   },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, maxHeight: '70%' },
-  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border },
+  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 0 },
+  searchRow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    marginHorizontal: spacing.lg, marginBottom: spacing.sm,
+    borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    backgroundColor: colors.card,
+  },
+  searchInput: { flex: 1, fontSize: fontSizes.md, color: colors.text },
   sheetTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.text },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   optionSelected: { backgroundColor: colors.softGreen },
