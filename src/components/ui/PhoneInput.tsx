@@ -80,13 +80,13 @@ const styles = StyleSheet.create({
   countryBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.md,
     backgroundColor: colors.card,
   },
   countryCode: { fontSize: fontSizes.md, color: colors.text, fontWeight: '600' },
   input: {
     flex: 1, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
+    padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, maxHeight: '70%' },
