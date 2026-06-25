@@ -28,6 +28,7 @@ type Props = {
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
   const [showPicker, setShowPicker] = useState(false)
   const [search, setSearch] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
   const countries = useMemo(buildCountryList, [])
   const filtered = search.trim()
     ? countries.filter((c) =>
@@ -62,7 +63,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
                 <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
-            <View style={styles.searchRow}>
+            <View style={[styles.searchRow, searchFocused && styles.searchRowFocused]}>
               <Ionicons name="search-outline" size={16} color={colors.muted} />
               <TextInput
                 style={styles.searchInput}
@@ -71,6 +72,8 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
                 value={search}
                 onChangeText={setSearch}
                 autoCorrect={false}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
               />
               {search.length > 0 && (
                 <TouchableOpacity onPress={() => setSearch('')}>
@@ -115,6 +118,7 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, maxHeight: '70%' },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 0 },
+  searchRowFocused: { borderColor: '#4A90D9' },
   searchRow: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     marginHorizontal: spacing.lg, marginBottom: spacing.sm,
@@ -122,7 +126,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card,
   },
-  searchInput: { flex: 1, fontSize: fontSizes.md, color: colors.text },
+  searchInput: { flex: 1, fontSize: fontSizes.md, color: colors.text, outlineStyle: 'none' as any },
   sheetTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.text },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   optionSelected: { backgroundColor: colors.softGreen },
