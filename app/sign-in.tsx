@@ -24,12 +24,11 @@ export default function LoginScreen() {
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
   const METHODS: Method[] = ['password', 'email-otp', 'phone-otp']
-  const [tabContainerWidth, setTabContainerWidth] = useState(0)
+  const [tabWidth, setTabWidth] = useState(0)
   const tabSlide = useRef(new Animated.Value(0)).current
 
   function switchMethod(newMethod: Method) {
     const index = METHODS.indexOf(newMethod)
-    const tabWidth = tabContainerWidth / METHODS.length
     Animated.spring(tabSlide, {
       toValue: index * tabWidth,
       useNativeDriver: true,
@@ -184,9 +183,11 @@ export default function LoginScreen() {
 
         <View
           style={styles.tabs}
-          onLayout={(e) => setTabContainerWidth(e.nativeEvent.layout.width - 6)}
+          onLayout={(e) => setTabWidth((e.nativeEvent.layout.width - 6) / METHODS.length)}
         >
-          <Animated.View style={[styles.tabPill, { width: `${100 / METHODS.length}%` as any, transform: [{ translateX: tabSlide }] }]} />
+          {tabWidth > 0 && (
+            <Animated.View style={[styles.tabPill, { width: tabWidth, transform: [{ translateX: tabSlide }] }]} />
+          )}
           <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => switchMethod('password')} />
           <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => switchMethod('email-otp')} />
           <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => switchMethod('phone-otp')} />
