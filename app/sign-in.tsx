@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
-  KeyboardAvoidingView, Platform, TouchableOpacity,
+  KeyboardAvoidingView, Platform, TouchableOpacity, Animated,
 } from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -23,6 +23,22 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [countryCode, setCountryCode] = useState('+1')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const slideAnim = useRef(new Animated.Value(0)).current
+  const METHODS: Method[] = ['password', 'email-otp', 'phone-otp']
+
+  function switchMethod(newMethod: Method) {
+    const direction = METHODS.indexOf(newMethod) > METHODS.indexOf(method) ? 60 : -60
+    slideAnim.setValue(direction)
+    setMethod(newMethod)
+    reset()
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 300,
+      friction: 30,
+    }).start()
+  }
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
@@ -166,12 +182,12 @@ export default function LoginScreen() {
         )}
 
         <View style={styles.tabs}>
-          <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => { setMethod('password'); reset() }} />
-          <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => { setMethod('email-otp'); reset() }} />
-          <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => { setMethod('phone-otp'); reset() }} />
+          <Tab label={trAuth.tabPassword} active={isPassword} onPress={() => switchMethod('password')} />
+          <Tab label={trAuth.tabEmail} active={isEmail} onPress={() => switchMethod('email-otp')} />
+          <Tab label={trAuth.tabPhone} active={isPhone} onPress={() => switchMethod('phone-otp')} />
         </View>
 
-        <View style={styles.form}>
+        <Animated.View style={[styles.form, { transform: [{ translateX: slideAnim }] }]}>
           {!otpSent && (
             <>
               {isPhone ? (
@@ -251,7 +267,7 @@ export default function LoginScreen() {
               <Text style={styles.linkText}>{isEmail ? trAuth.changeEmail : trAuth.changePhone}</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </Animated.View>
 
         <TouchableOpacity style={styles.registerBtn} onPress={() => router.navigate('/sign-up')}>
           <Text style={styles.registerText}>{trAuth.noAccountYet} <Text style={styles.registerEmphasis}>{trAuth.createOne}</Text></Text>

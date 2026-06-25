@@ -72,12 +72,13 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
 
       {/* Backdrop — instant, no animation */}
       <Modal visible={showPicker} transparent animationType="none">
-        <TouchableOpacity style={styles.backdrop} onPress={close} activeOpacity={1} />
+        <View style={styles.backdrop} pointerEvents="none" />
       </Modal>
 
-      {/* Sheet — slides up independently */}
-      <Modal visible={showPicker} transparent animationType="slide">
+      {/* Sheet — slides up; tap above sheet to dismiss */}
+      <Modal visible={showPicker} transparent animationType="slide" onRequestClose={close}>
         <View style={styles.sheetContainer}>
+          <TouchableOpacity style={styles.sheetDismissArea} onPress={close} activeOpacity={1} />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.sheet}
@@ -148,6 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheetContainer: { flex: 1, justifyContent: 'flex-end' },
+  sheetDismissArea: { flex: 1 },
   sheet: {
     backgroundColor: colors.card,
     borderTopLeftRadius: radius.lg,
