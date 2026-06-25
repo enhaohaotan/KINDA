@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { LanguageCode } from '../data/languages'
 import { getSupabase } from '../lib/supabase'
+import { detectUILanguage } from '../lib/locale'
 
 type UserState = {
   userId: string | null
@@ -19,8 +20,8 @@ type UserState = {
 export const useUserStore = create<UserState>((set, get) => ({
   userId: null,
   email: null,
-  uiLanguage: 'en',
-  learningLanguage: 'en',
+  uiLanguage: detectUILanguage(),
+  learningLanguage: 'da',
   onboardingComplete: false,
 
   setUser: (userId, email) => set({ userId, email }),

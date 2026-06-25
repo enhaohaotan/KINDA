@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
 import { UI_LANGUAGES, TARGET_LANGUAGES, getTargetLabel, type LanguageCode } from '../src/data/languages'
+import { detectUILanguage } from '../src/lib/locale'
 import { t, tAuth } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
@@ -36,7 +37,7 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [uiLanguage, setUiLanguage] = useState<LanguageCode>('en')
+  const [uiLanguage, setUiLanguage] = useState<LanguageCode>(detectUILanguage)
   const [learningLanguage, setLearningLanguage] = useState<LanguageCode>('da')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
