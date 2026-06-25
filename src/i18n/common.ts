@@ -15,7 +15,7 @@ export type CommonTranslations = {
 export const COMMON: Record<LanguageCode, CommonTranslations> = {
   en: {
     appName: 'KINDA',
-    appTagline: "Learn. Or don't. Either way.",
+    appTagline: "Fluent? Eventually. Maybe.",
     appDesc: "An AI language app that won't nag you.\nOpen it when you feel like it.",
     iSpeak: 'I speak',
     iLearn: 'I want to learn',
