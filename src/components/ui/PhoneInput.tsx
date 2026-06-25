@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetView } from '@gorhom/bottom-sheet'
 import { getCountries, getCountryCallingCode, getExampleNumber, type CountryCode } from 'libphonenumber-js'
 import examples from 'libphonenumber-js/examples.mobile.json'
 import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
@@ -28,7 +28,7 @@ type Props = {
 }
 
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
-  const sheetRef = useRef<BottomSheet>(null)
+  const sheetRef = useRef<BottomSheetModal>(null)
   const [search, setSearch] = useState('')
   const countries = useMemo(buildCountryList, [])
 
@@ -57,11 +57,11 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
   )
 
   function open() {
-    sheetRef.current?.expand()
+    sheetRef.current?.present()
   }
 
   function close() {
-    sheetRef.current?.close()
+    sheetRef.current?.dismiss()
     setSearch('')
   }
 
@@ -82,13 +82,12 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         />
       </View>
 
-      <BottomSheet
+      <BottomSheetModal
         ref={sheetRef}
-        index={-1}
         snapPoints={snapPoints}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        onClose={() => setSearch('')}
+        onDismiss={() => setSearch('')}
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.handle}
         keyboardBehavior="interactive"
@@ -135,7 +134,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
             </TouchableOpacity>
           )}
         />
-      </BottomSheet>
+      </BottomSheetModal>
     </>
   )
 }
