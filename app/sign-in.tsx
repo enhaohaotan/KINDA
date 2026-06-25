@@ -7,6 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
+import { t } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 type Method = 'password' | 'email-otp' | 'phone-otp'
@@ -20,7 +21,8 @@ export default function LoginScreen() {
   const [otpSent, setOtpSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { setUser, setOnboardingComplete, loadSettings } = useUserStore()
+  const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
+  const tr = t(uiLanguage)
 
   function reset() {
     setError('')
@@ -148,8 +150,8 @@ export default function LoginScreen() {
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
 
-        <Text style={styles.logo}>都行 KINDA</Text>
-        <Text style={styles.tagline}>学也行，不学也行，都行。</Text>
+        <Text style={styles.logo}>{tr.appName}</Text>
+        <Text style={styles.tagline}>{tr.appTagline}</Text>
 
         {registered === '1' && (
           <View style={styles.successBanner}>

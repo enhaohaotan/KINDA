@@ -28,7 +28,7 @@ export default function OnboardingScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.logo}>都行 KINDA</Text>
+          <Text style={styles.logo}>{tr.appName}</Text>
           <Text style={styles.tagline}>Learn. Or don't. Either way.</Text>
           <Text style={styles.desc}>An AI language app that won't nag you.{'\n'}Open it when you feel like it.</Text>
         </View>

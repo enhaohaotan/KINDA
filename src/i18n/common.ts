@@ -1,6 +1,7 @@
 import type { LanguageCode } from '../data/languages'
 
 export type CommonTranslations = {
+  appName: string
   appTagline: string
   appDesc: string
   iSpeak: string
@@ -13,6 +14,7 @@ export type CommonTranslations = {
 
 export const COMMON: Record<LanguageCode, CommonTranslations> = {
   en: {
+    appName: 'KINDA',
     appTagline: "Learn. Or don't. Either way.",
     appDesc: "An AI language app that won't nag you.\nOpen it when you feel like it.",
     iSpeak: 'I speak',
@@ -23,6 +25,7 @@ export const COMMON: Record<LanguageCode, CommonTranslations> = {
     saved: '✓ Saved',
   },
   zh: {
+    appName: '都行',
     appTagline: '学也行，不学也行，都行。',
     appDesc: '一个不逼你打卡的 AI 语言学习 App。\n想起来就看两眼，不想学也没事。',
     iSpeak: '我说',
@@ -33,6 +36,7 @@ export const COMMON: Record<LanguageCode, CommonTranslations> = {
     saved: '✓ 已保存',
   },
   da: {
+    appName: 'KINDA',
     appTagline: 'Lær. Eller lad være. Begge dele er fint.',
     appDesc: 'En AI-sprogapp der ikke maser på.\nÅbn den når du har lyst.',
     iSpeak: 'Jeg taler',

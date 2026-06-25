@@ -1,5 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { useUserStore } from '../../store/userStore'
+import { t } from '../../lib/i18n'
 import { colors, fontSizes, spacing } from '../../styles/tokens'
 
 type Props = {
@@ -7,9 +9,11 @@ type Props = {
 }
 
 export function BrandHeader({ subtitle }: Props) {
+  const { uiLanguage } = useUserStore()
+  const tr = t(uiLanguage)
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>都行 KINDA</Text>
+      <Text style={styles.title}>{tr.appName}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   )
