@@ -70,7 +70,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         />
       </View>
 
-      <Modal visible={showPicker} animationType="fade" transparent onRequestClose={close}>
+      <Modal visible={showPicker} animationType="none" transparent onRequestClose={close}>
         {/* Overlay stays fixed — fade animation applies to the whole modal but
             the overlay covers the screen from the start, so it never "slides" */}
         <View style={styles.overlay}>
