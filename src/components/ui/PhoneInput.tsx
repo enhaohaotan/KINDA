@@ -1,8 +1,21 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Modal, FlatList, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { COUNTRY_CODES } from '../../data/countryCodes'
+import { getCountries, getCountryCallingCode, type CountryCode } from 'libphonenumber-js'
 import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
+
+type CountryEntry = { iso: CountryCode; dialCode: string; name: string }
+
+function buildCountryList(): CountryEntry[] {
+  const dn = new Intl.DisplayNames(['en'], { type: 'region' })
+  return getCountries()
+    .map((iso) => ({
+      iso,
+      dialCode: `+${getCountryCallingCode(iso)}`,
+      name: dn.of(iso) ?? iso,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
 
 type Props = {
   countryCode: string
@@ -14,6 +27,7 @@ type Props = {
 
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
   const [showPicker, setShowPicker] = useState(false)
+  const countries = useMemo(buildCountryList, [])
 
   return (
     <>
@@ -42,15 +56,15 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
               </TouchableOpacity>
             </View>
             <FlatList
-              data={COUNTRY_CODES}
-              keyExtractor={(item) => item.code}
+              data={countries}
+              keyExtractor={(item) => item.iso}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[styles.option, countryCode === item.code && styles.optionSelected]}
-                  onPress={() => { onChangeCountryCode(item.code); setShowPicker(false) }}
+                  style={[styles.option, countryCode === item.dialCode && styles.optionSelected]}
+                  onPress={() => { onChangeCountryCode(item.dialCode); setShowPicker(false) }}
                 >
-                  <Text style={styles.optionLabel}>{item.label}</Text>
-                  <Text style={styles.optionCode}>{item.code}</Text>
+                  <Text style={styles.optionLabel}>{item.name}</Text>
+                  <Text style={styles.optionCode}>{item.dialCode}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -80,6 +94,6 @@ const styles = StyleSheet.create({
   sheetTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.text },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   optionSelected: { backgroundColor: colors.softGreen },
-  optionLabel: { fontSize: fontSizes.md, color: colors.text },
+  optionLabel: { fontSize: fontSizes.md, color: colors.text, flex: 1, marginRight: spacing.sm },
   optionCode: { fontSize: fontSizes.md, color: colors.muted, fontWeight: '600' },
 })
