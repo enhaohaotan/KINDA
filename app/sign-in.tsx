@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
-import { t } from '../src/lib/i18n'
+import { t, tAuth } from '../src/lib/i18n'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 type Method = 'password' | 'email-otp' | 'phone-otp'
@@ -15,7 +15,7 @@ type Method = 'password' | 'email-otp' | 'phone-otp'
 export default function LoginScreen() {
   const { registered } = useLocalSearchParams<{ registered?: string }>()
   const [method, setMethod] = useState<Method>('password')
-  const [identifier, setIdentifier] = useState('')   // email, username, or phone
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
@@ -23,6 +23,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
   const tr = t(uiLanguage)
+  const trAuth = tAuth(uiLanguage)
 
   function reset() {
     setError('')
@@ -34,25 +35,22 @@ export default function LoginScreen() {
 
   async function resolveEmail(raw: string): Promise<string | null> {
     const v = raw.trim().toLowerCase()
-    // Looks like an email
     if (v.includes('@')) return v
-    // Looks like a phone
     if (v.startsWith('+')) {
       const { data } = await supabase.from('profiles').select('email').eq('phone', v).single()
       return data?.email ?? null
     }
-    // Username lookup
     const { data } = await supabase.from('profiles').select('email').eq('username', v).single()
     return data?.email ?? null
   }
 
   async function handlePasswordLogin() {
     setError('')
-    if (!identifier.trim() || !password) return setError('Please fill in all fields.')
+    if (!identifier.trim() || !password) return setError(trAuth.identifierPlaceholder)
     setLoading(true)
     try {
       const email = await resolveEmail(identifier)
-      if (!email) return setError('No account found with that username, email, or phone.')
+      if (!email) return setError('No account found.')
       const { data, error: e } = await supabase.auth.signInWithPassword({ email, password })
       if (e) throw e
       if (data.user) {
@@ -70,7 +68,7 @@ export default function LoginScreen() {
 
   async function handleSendEmailOtp() {
     setError('')
-    if (!identifier.trim()) return setError('Enter your email address.')
+    if (!identifier.trim()) return setError(trAuth.email)
     setLoading(true)
     try {
       const { error: e } = await supabase.auth.signInWithOtp({ email: identifier.trim().toLowerCase() })
@@ -85,7 +83,7 @@ export default function LoginScreen() {
 
   async function handleVerifyEmailOtp() {
     setError('')
-    if (!otp.trim()) return setError('Enter the code from your email.')
+    if (!otp.trim()) return
     setLoading(true)
     try {
       const { data, error: e } = await supabase.auth.verifyOtp({
@@ -109,7 +107,7 @@ export default function LoginScreen() {
 
   async function handleSendPhoneOtp() {
     setError('')
-    if (!identifier.trim()) return setError('Enter your phone number with country code, e.g. +1 234 567 8900')
+    if (!identifier.trim()) return
     setLoading(true)
     try {
       const { error: e } = await supabase.auth.signInWithOtp({ phone: identifier.trim() })
@@ -124,7 +122,7 @@ export default function LoginScreen() {
 
   async function handleVerifyPhoneOtp() {
     setError('')
-    if (!otp.trim()) return setError('Enter the code from your SMS.')
+    if (!otp.trim()) return
     setLoading(true)
     try {
       const { data, error: e } = await supabase.auth.verifyOtp({
@@ -156,23 +154,21 @@ export default function LoginScreen() {
         {registered === '1' && (
           <View style={styles.successBanner}>
             <Ionicons name="checkmark-circle" size={18} color="#2e7d32" />
-            <Text style={styles.successText}>Account created! Check your email to verify, then sign in.</Text>
+            <Text style={styles.successText}>{trAuth.joinKinda} ✓</Text>
           </View>
         )}
 
-        {/* Method tabs */}
         <View style={styles.tabs}>
-          <Tab label="Password" active={method === 'password'} onPress={() => { setMethod('password'); reset() }} />
-          <Tab label="Email code" active={method === 'email-otp'} onPress={() => { setMethod('email-otp'); reset() }} />
-          <Tab label="SMS code" active={method === 'phone-otp'} onPress={() => { setMethod('phone-otp'); reset() }} />
+          <Tab label={trAuth.tabPassword} active={method === 'password'} onPress={() => { setMethod('password'); reset() }} />
+          <Tab label={trAuth.tabEmail} active={method === 'email-otp'} onPress={() => { setMethod('email-otp'); reset() }} />
+          <Tab label={trAuth.tabPhone} active={method === 'phone-otp'} onPress={() => { setMethod('phone-otp'); reset() }} />
         </View>
 
-        {/* Password login */}
         {method === 'password' && (
           <View style={styles.form}>
             <TextInput
               style={styles.input}
-              placeholder="Username, email, or phone"
+              placeholder={trAuth.identifierPlaceholder}
               placeholderTextColor={colors.muted}
               value={identifier}
               onChangeText={setIdentifier}
@@ -180,25 +176,24 @@ export default function LoginScreen() {
             />
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={trAuth.password}
               placeholderTextColor={colors.muted}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
             {error ? <ErrorBox message={error} /> : null}
-            <PrimaryButton label={loading ? 'Signing in…' : 'Sign in'} onPress={handlePasswordLogin} disabled={loading} />
+            <PrimaryButton label={loading ? trAuth.signingIn : trAuth.signIn} onPress={handlePasswordLogin} disabled={loading} />
           </View>
         )}
 
-        {/* Email OTP */}
         {method === 'email-otp' && (
           <View style={styles.form}>
             {!otpSent ? (
               <>
                 <TextInput
                   style={styles.input}
-                  placeholder="your@email.com"
+                  placeholder="you@example.com"
                   placeholderTextColor={colors.muted}
                   value={identifier}
                   onChangeText={setIdentifier}
@@ -206,17 +201,17 @@ export default function LoginScreen() {
                   keyboardType="email-address"
                 />
                 {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? 'Sending…' : 'Send code'} onPress={handleSendEmailOtp} disabled={loading} />
+                <PrimaryButton label={loading ? trAuth.sending : trAuth.sendCode} onPress={handleSendEmailOtp} disabled={loading} />
               </>
             ) : (
               <>
                 <View style={styles.sentNote}>
                   <Ionicons name="mail-outline" size={18} color={colors.primary} />
-                  <Text style={styles.sentText}>Code sent to <Text style={styles.sentEmail}>{identifier}</Text></Text>
+                  <Text style={styles.sentText}>{trAuth.codeSentEmail} <Text style={styles.sentEmail}>{identifier}</Text></Text>
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="6-digit code"
+                  placeholder={trAuth.codePlaceholder}
                   placeholderTextColor={colors.muted}
                   value={otp}
                   onChangeText={setOtp}
@@ -224,16 +219,15 @@ export default function LoginScreen() {
                   maxLength={6}
                 />
                 {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? 'Verifying…' : 'Verify & sign in'} onPress={handleVerifyEmailOtp} disabled={loading} />
+                <PrimaryButton label={loading ? trAuth.verifying : trAuth.verifySignIn} onPress={handleVerifyEmailOtp} disabled={loading} />
                 <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
-                  <Text style={styles.linkText}>← Change email</Text>
+                  <Text style={styles.linkText}>{trAuth.changeEmail}</Text>
                 </TouchableOpacity>
               </>
             )}
           </View>
         )}
 
-        {/* Phone OTP */}
         {method === 'phone-otp' && (
           <View style={styles.form}>
             {!otpSent ? (
@@ -246,19 +240,18 @@ export default function LoginScreen() {
                   onChangeText={setIdentifier}
                   keyboardType="phone-pad"
                 />
-                <Text style={styles.hint}>Requires SMS to be enabled in your Supabase project.</Text>
                 {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? 'Sending…' : 'Send SMS code'} onPress={handleSendPhoneOtp} disabled={loading} />
+                <PrimaryButton label={loading ? trAuth.sending : trAuth.sendCode} onPress={handleSendPhoneOtp} disabled={loading} />
               </>
             ) : (
               <>
                 <View style={styles.sentNote}>
                   <Ionicons name="phone-portrait-outline" size={18} color={colors.primary} />
-                  <Text style={styles.sentText}>SMS sent to <Text style={styles.sentEmail}>{identifier}</Text></Text>
+                  <Text style={styles.sentText}>{trAuth.codeSentPhone} <Text style={styles.sentEmail}>{identifier}</Text></Text>
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="6-digit code"
+                  placeholder={trAuth.codePlaceholder}
                   placeholderTextColor={colors.muted}
                   value={otp}
                   onChangeText={setOtp}
@@ -266,9 +259,9 @@ export default function LoginScreen() {
                   maxLength={6}
                 />
                 {error ? <ErrorBox message={error} /> : null}
-                <PrimaryButton label={loading ? 'Verifying…' : 'Verify & sign in'} onPress={handleVerifyPhoneOtp} disabled={loading} />
+                <PrimaryButton label={loading ? trAuth.verifying : trAuth.verifySignIn} onPress={handleVerifyPhoneOtp} disabled={loading} />
                 <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.linkBtn}>
-                  <Text style={styles.linkText}>← Change number</Text>
+                  <Text style={styles.linkText}>{trAuth.changePhone}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -276,7 +269,7 @@ export default function LoginScreen() {
         )}
 
         <TouchableOpacity style={styles.registerBtn} onPress={() => router.navigate('/sign-up')}>
-          <Text style={styles.registerText}>No account yet? <Text style={styles.registerEmphasis}>Create one</Text></Text>
+          <Text style={styles.registerText}>{trAuth.noAccountYet} <Text style={styles.registerEmphasis}>{trAuth.createOne}</Text></Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -315,11 +308,11 @@ const styles = StyleSheet.create({
   logo: { fontSize: fontSizes.xxl, fontWeight: '800', color: colors.text, textAlign: 'center' },
   tagline: { fontSize: fontSizes.md, color: colors.muted, textAlign: 'center', marginTop: -spacing.sm },
   successBanner: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
     backgroundColor: '#E8F5E9', borderRadius: radius.md, padding: spacing.md,
     borderWidth: 1, borderColor: '#A5D6A7',
   },
-  successText: { flex: 1, fontSize: fontSizes.sm, color: '#2e7d32', lineHeight: 20 },
+  successText: { flex: 1, fontSize: fontSizes.sm, color: '#2e7d32' },
   tabs: { flexDirection: 'row', backgroundColor: colors.card, borderRadius: radius.md, padding: 4, borderWidth: 1, borderColor: colors.border },
   tab: { flex: 1, paddingVertical: spacing.sm, alignItems: 'center', borderRadius: radius.sm },
   tabActive: { backgroundColor: colors.primary },
@@ -330,7 +323,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
     padding: spacing.md, fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
-  hint: { fontSize: fontSizes.xs, color: colors.muted },
   sentNote: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, backgroundColor: colors.softGreen, borderRadius: radius.md },
   sentText: { fontSize: fontSizes.sm, color: colors.text, flex: 1 },
   sentEmail: { fontWeight: '700', color: colors.primary },
