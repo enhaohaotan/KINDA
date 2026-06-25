@@ -28,7 +28,6 @@ type Props = {
 export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePhone, placeholder = '123 456 7890' }: Props) {
   const [showPicker, setShowPicker] = useState(false)
   const [search, setSearch] = useState('')
-  const [searchFocused, setSearchFocused] = useState(false)
   const countries = useMemo(buildCountryList, [])
   const filtered = search.trim()
     ? countries.filter((c) =>
@@ -63,8 +62,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
                 <Ionicons name="close" size={22} color={colors.text} />
               </TouchableOpacity>
             </View>
-            <View style={[styles.searchRow, searchFocused && styles.searchRowFocused]}>
-              <Ionicons name="search-outline" size={16} color={colors.muted} />
+            <View style={styles.searchWrap}>
               <TextInput
                 style={styles.searchInput}
                 placeholder="Search"
@@ -72,11 +70,12 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
                 value={search}
                 onChangeText={setSearch}
                 autoCorrect={false}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
               />
+              <View style={styles.searchIconLeft} pointerEvents="none">
+                <Ionicons name="search-outline" size={16} color={colors.muted} />
+              </View>
               {search.length > 0 && (
-                <TouchableOpacity onPress={() => setSearch('')}>
+                <TouchableOpacity style={styles.searchClear} onPress={() => setSearch('')}>
                   <Ionicons name="close-circle" size={16} color={colors.muted} />
                 </TouchableOpacity>
               )}
@@ -118,15 +117,14 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, maxHeight: '70%' },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: 0 },
-  searchRowFocused: { borderColor: '#4A90D9' },
-  searchRow: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    marginHorizontal: spacing.lg, marginBottom: spacing.sm,
+  searchWrap: { position: 'relative', marginHorizontal: spacing.lg, marginBottom: spacing.sm },
+  searchInput: {
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-    backgroundColor: colors.card,
+    paddingVertical: spacing.sm, paddingLeft: spacing.xl + spacing.xs, paddingRight: spacing.xl,
+    fontSize: fontSizes.md, color: colors.text, backgroundColor: colors.card,
   },
-  searchInput: { flex: 1, fontSize: fontSizes.md, color: colors.text, outlineStyle: 'none' as any },
+  searchIconLeft: { position: 'absolute', left: spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
+  searchClear: { position: 'absolute', right: spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
   sheetTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.text },
   option: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
   optionSelected: { backgroundColor: colors.softGreen },
