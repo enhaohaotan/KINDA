@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../src/lib/supabase'
 import { useUserStore } from '../src/store/userStore'
 import { t, tAuth } from '../src/lib/i18n'
+import { PhoneInput } from '../src/components/ui/PhoneInput'
 import { colors, fontSizes, spacing, radius } from '../src/styles/tokens'
 
 type Method = 'password' | 'email-otp' | 'phone-otp'
@@ -19,6 +20,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
+  const [countryCode, setCountryCode] = useState('+1')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { setUser, setOnboardingComplete, loadSettings, uiLanguage } = useUserStore()
@@ -107,11 +110,13 @@ export default function LoginScreen() {
 
   async function handleSendPhoneOtp() {
     setError('')
-    if (!identifier.trim()) return
+    const fullPhone = `${countryCode}${phoneNumber.trim()}`
+    if (!phoneNumber.trim()) return
     setLoading(true)
     try {
-      const { error: e } = await supabase.auth.signInWithOtp({ phone: identifier.trim() })
+      const { error: e } = await supabase.auth.signInWithOtp({ phone: fullPhone })
       if (e) throw e
+      setIdentifier(fullPhone)
       setOtpSent(true)
     } catch (e: any) {
       setError(e.message)
@@ -168,29 +173,36 @@ export default function LoginScreen() {
           {/* Step 1: identifier input — hidden once OTP is sent */}
           {!otpSent && (
             <>
-              <TextInput
-                style={styles.input}
-                placeholder={
-                  method === 'password' ? trAuth.identifierPlaceholder
-                  : method === 'email-otp' ? 'you@example.com'
-                  : '+1 234 567 8900'
-                }
-                placeholderTextColor={colors.muted}
-                value={identifier}
-                onChangeText={setIdentifier}
-                autoCapitalize="none"
-                keyboardType={method === 'phone-otp' ? 'phone-pad' : method === 'email-otp' ? 'email-address' : 'default'}
-              />
+              {method !== 'phone-otp' && (
+                <TextInput
+                  style={styles.input}
+                  placeholder={method === 'password' ? trAuth.identifierPlaceholder : 'you@example.com'}
+                  placeholderTextColor={colors.muted}
+                  value={identifier}
+                  onChangeText={setIdentifier}
+                  autoCapitalize="none"
+                  keyboardType={method === 'email-otp' ? 'email-address' : 'default'}
+                />
+              )}
               {/* Password field — only for password method, keeps height consistent */}
-              <TextInput
-                style={[styles.input, method !== 'password' && styles.inputHidden]}
-                placeholder={trAuth.password}
-                placeholderTextColor={colors.muted}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={method === 'password'}
-              />
+                  {method === 'phone-otp' ? (
+                <PhoneInput
+                  countryCode={countryCode}
+                  phone={phoneNumber}
+                  onChangeCountryCode={setCountryCode}
+                  onChangePhone={setPhoneNumber}
+                />
+              ) : (
+                <TextInput
+                  style={[styles.input, method !== 'password' && styles.inputHidden]}
+                  placeholder={trAuth.password}
+                  placeholderTextColor={colors.muted}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  editable={method === 'password'}
+                />
+              )}
             </>
           )}
 
