@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, Modal, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { getCountries, getCountryCallingCode, type CountryCode } from 'libphonenumber-js'
+import { getCountries, getCountryCallingCode, getExampleNumber, type CountryCode } from 'libphonenumber-js'
+import examples from 'libphonenumber-js/examples.mobile.json'
 import { colors, fontSizes, spacing, radius } from '../../styles/tokens'
 
 type CountryEntry = { iso: CountryCode; dialCode: string; name: string }
@@ -29,6 +30,17 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
   const [showPicker, setShowPicker] = useState(false)
   const [search, setSearch] = useState('')
   const countries = useMemo(buildCountryList, [])
+
+  const phonePlaceholder = useMemo(() => {
+    const entry = countries.find((c) => c.dialCode === countryCode)
+    if (!entry) return placeholder
+    try {
+      return getExampleNumber(entry.iso, examples as any)?.formatNational() ?? placeholder
+    } catch {
+      return placeholder
+    }
+  }, [countryCode, countries, placeholder])
+
   const filtered = search.trim()
     ? countries.filter((c) =>
         c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -50,7 +62,7 @@ export function PhoneInput({ countryCode, phone, onChangeCountryCode, onChangePh
         </TouchableOpacity>
         <TextInput
           style={styles.input}
-          placeholder={placeholder}
+          placeholder={phonePlaceholder}
           placeholderTextColor={colors.muted}
           value={phone}
           onChangeText={onChangePhone}
